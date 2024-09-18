@@ -8,18 +8,24 @@ import (
 func main() {
 	const port = "8080" 
 
-	serveMux := http.NewServeMux()
+	mux := http.NewServeMux()
 	// Use http.FileServer to serve static files from the current directory
 	fileServer := http.FileServer(http.Dir("."))
 	
-	serveMux.Handle("/", fileServer)
-	
+	mux.Handle("/app/", http.StripPrefix("/app", fileServer))
+	mux.HandleFunc("/healthz", readinessHandler)
 	server := &http.Server{
 		Addr: ":" + port,
-		Handler: serveMux,
+		Handler: mux,
 	}
 	log.Printf("Serving running on port: %s\n", port)
 	log.Fatal(server.ListenAndServe())
+}
+
+func readinessHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 type Server struct {
