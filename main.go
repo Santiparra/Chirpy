@@ -7,7 +7,12 @@ import (
 
 func main() {
 	const port = "8080" 
+
 	serveMux := http.NewServeMux()
+	// Use http.FileServer to serve static files from the current directory
+	fileServer := http.FileServer(http.Dir("."))
+	
+	serveMux.Handle("/", fileServer)
 	
 	server := &http.Server{
 		Addr: ":" + port,
