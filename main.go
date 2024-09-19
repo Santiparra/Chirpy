@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"flag"
 	"github.com/Santiparra/Chirpy/internal/database"
 )
 
@@ -20,6 +21,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	dbg := flag.Bool("debug", false, "Enable debug mode")
+	flag.Parse()
+	if dbg != nil && *dbg {
+		err := db.ResetDB()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: 0,
 		DB:             db,
@@ -34,6 +44,7 @@ func main() {
 	mux.HandleFunc("GET /api/reset", apiCfg.handlerReset)
 	
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
+	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 	
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsRetrieve)
