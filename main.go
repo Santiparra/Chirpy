@@ -5,28 +5,35 @@ import (
 	"net/http"
 )
 
+type apiConfig struct {
+	fileserverHits int
+}
+
 func main() {
-	const port = "8080" 
+	const filepathRoot = "."
+	const port = "8080"
+
+	apiCfg := apiConfig{
+		fileserverHits: 0,
+	}
 
 	mux := http.NewServeMux()
-	// Use http.FileServer to serve static files from the current directory
-	fileServer := http.FileServer(http.Dir("."))
-	
-	mux.Handle("/app/", http.StripPrefix("/app", fileServer))
-	mux.HandleFunc("/healthz", readinessHandler)
-	server := &http.Server{
-		Addr: ":" + port,
+	fsHandler := apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
+	mux.Handle("/app/", fsHandler)
+
+	mux.HandleFunc("GET /healthz", handlerReadiness)
+	mux.HandleFunc("GET /reset", apiCfg.handlerReset)
+	mux.HandleFunc("GET /metrics", apiCfg.handlerMetrics)
+
+	srv := &http.Server{
+		Addr:    ":" + port,
 		Handler: mux,
 	}
-	log.Printf("Serving running on port: %s\n", port)
-	log.Fatal(server.ListenAndServe())
+
+	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
+	log.Fatal(srv.ListenAndServe())
 }
 
-func readinessHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-}
 
 type Server struct {
 	// Addr optionally specifies the TCP address for the server to listen on,
