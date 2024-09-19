@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"github.com/Santiparra/Chirpy/internal/database"
 )
 
 type apiConfig struct {
@@ -13,8 +14,14 @@ func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
+	db, err := database.NewDB("database.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: 0,
+		DB:             db,
 	}
 
 	mux := http.NewServeMux()
@@ -24,7 +31,8 @@ func main() {
 	//API HANDLERS
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("GET /api/reset", apiCfg.handlerReset)
-	mux.HandleFunc("POST /api/validate_chirp", handlerChirp)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
+	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsRetrieve)
 
 	//SERVE HANDLERS
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
