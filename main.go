@@ -24,6 +24,7 @@ func main() {
 	//API HANDLERS
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("GET /api/reset", apiCfg.handlerReset)
+	mux.HandleFunc("POST /api/validate_chirp", handlerChirp)
 
 	//SERVE HANDLERS
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
