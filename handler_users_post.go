@@ -8,6 +8,7 @@ import (
 	"github.com/Santiparra/Chirpy/internal/database"
 )
 
+
 type User struct {
 	ID       int    `json:"id"`
 	Email    string `json:"email"`
