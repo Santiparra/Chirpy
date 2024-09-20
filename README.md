@@ -72,8 +72,12 @@ To get started with Chirpy:
 
 2. Install dependencies and create your .env file using .env.template as a guide.
 
+    ```bash
+    go mod tidy
+    ```
+
 3. Run the application:
 
-```bash
-go build -o out && ./out --debug
-```
+    ```bash
+    go build -o out && ./out --debug
+    ```
